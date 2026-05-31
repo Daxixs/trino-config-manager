@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Resource Groups — Trino Config Manager{% endblock %}
+{% block breadcrumb %}/ resource-groups{% endblock %}
+{% block page_title %}Resource Groups (Квоты){% endblock %}
+
+{% block content %}
+{% if errors %}
+<div class="alert alert-danger">
+    <div>
+        <strong>Ошибки валидации ({{ errors|length }}):</strong>
+        <ul class="errors-list mt-4">
+            {% for e in errors %}<li>{{ e }}</li>{% endfor %}
+        </ul>
+    </div>
+</div>
+{% endif %}
+
+<div class="alert alert-warning">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    Файл: <span class="text-mono">resource_groups.json</span> — управляет квотами CPU, памяти и параллелизма запросов.
+</div>
+
+<form method="post" action="/resource-groups/save">
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">resource_groups.json</span>
+            <span class="badge badge-blue">JSON</span>
+        </div>
+        <div class="card-body">
+            <textarea class="code-editor {% if errors %}has-errors{% endif %}"
+                      name="content" id="editor" rows="30"
+                      spellcheck="false">{{ content }}</textarea>
+            {% if backups %}
+            <div class="backups-list">Бэкапы: {{ backups | join(', ') }}</div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="flex gap-3 mt-4">
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <a href="/" class="btn btn-secondary">Отмена</a>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.getElementById('editor').addEventListener('keydown', function(e) {
+    if (e.key === 'Tab') {
+        e.preventDefault();
+        const s = this.selectionStart;
+        this.value = this.value.substring(0, s) + '  ' + this.value.substring(this.selectionEnd);
+        this.selectionStart = this.selectionEnd = s + 2;
+    }
+});
+</script>
+{% endblock %}

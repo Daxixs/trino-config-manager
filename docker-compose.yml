@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  trino-config-manager:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - trino-configs:/etc/trino
+      - .:/app
+    environment:
+      TRINO_CONFIG_DIR: /etc/trino
+      TRINO_CATALOG_DIR: /etc/trino/catalog
+      TRINO_HOST: trino
+      TRINO_PORT: 8080
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: admin
+      SECRET_KEY: change-me-please
+    depends_on:
+      - trino
+    restart: unless-stopped
+
+  trino:
+    image: trinodb/trino:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - trino-configs:/etc/trino:ro
+    restart: unless-stopped
+
+volumes:
+  trino-configs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./trino_configs_local

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Каталоги — Trino Config Manager{% endblock %}
+{% block breadcrumb %}/ catalogs{% endblock %}
+{% block page_title %}Каталоги (Catalog Connectors){% endblock %}
+{% block topbar_actions %}
+    <a href="/catalogs/new" class="btn btn-primary btn-sm">+ Добавить каталог</a>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">Список каталогов</span>
+        <span class="badge badge-blue">{{ catalogs|length }} шт</span>
+    </div>
+    {% if catalogs %}
+    <table>
+        <thead>
+            <tr>
+                <th>Имя каталога</th>
+                <th>Путь к файлу</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cat in catalogs %}
+            <tr>
+                <td>
+                    <span class="text-mono" style="color:var(--text); font-weight:500">{{ cat }}</span>
+                </td>
+                <td>
+                    <span class="text-mono text-xs text-muted">catalog/{{ cat }}.properties</span>
+                </td>
+                <td>
+                    <div class="flex gap-2">
+                        <a href="/catalogs/{{ cat }}/edit" class="btn btn-secondary btn-sm">Редактировать</a>
+                        <form method="post" action="/catalogs/{{ cat }}/delete" style="display:inline"
+                              onsubmit="return confirm('Удалить каталог {{ cat }}?')">
+                            <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        <p>Каталоги не найдены. <a href="/catalogs/new" style="color:var(--accent)">Создать первый</a></p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

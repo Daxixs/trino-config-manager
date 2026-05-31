@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Reload Trino — Trino Config Manager{% endblock %}
+{% block page_title %}Reload Trino{% endblock %}
+
+{% block content %}
+
+<div class="grid grid-2 mb-3">
+  <div class="stat-card">
+    <div class="stat-value" style="color: {% if health.alive %}var(--success){% else %}var(--danger){% endif %}">
+      {% if health.alive %}UP{% else %}DOWN{% endif %}
+    </div>
+    <div class="stat-label">Trino status right now</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value" style="font-size: 16px; padding-top: 6px; color: var(--text-muted);">
+      kill -HUP &lt;pid&gt;
+    </div>
+    <div class="stat-label">Reload mechanism (configurable via .env)</div>
+  </div>
+</div>
+
+{% if result %}
+  {% if result.success %}
+  <div class="alert alert-success">
+    ✓ Trino reload signal sent successfully. Trino will re-read all config files momentarily.
+  </div>
+  {% else %}
+  <div class="alert alert-danger">
+    ✕ Reload command failed (exit code {{ result.returncode }}).
+  </div>
+  {% endif %}
+
+  <div class="card mb-3">
+    <div class="card-header">
+      <span class="card-title">Command Output</span>
+      <span class="badge {% if result.success %}badge-green{% else %}badge-red{% endif %}">
+        exit {{ result.returncode }}
+      </span>
+    </div>
+    <div class="card-body">
+      <div class="form-group">
+        <div class="form-label">Command</div>
+        <div class="text-mono text-sm" style="color: var(--text-muted)">{{ result.command }}</div>
+      </div>
+      {% if result.output %}
+      <div class="form-group">
+        <div class="form-label">Stdout</div>
+        <pre style="font-family: var(--mono); font-size: 12px; color: var(--text); background: var(--bg); padding: 12px; border-radius: 6px; border: 1px solid var(--border); overflow-x: auto;">{{ result.output }}</pre>
+      </div>
+      {% endif %}
+      {% if result.error %}
+      <div class="form-group">
+        <div class="form-label">Stderr</div>
+        <pre style="font-family: var(--mono); font-size: 12px; color: var(--danger); background: var(--bg); padding: 12px; border-radius: 6px; border: 1px solid rgba(248,81,73,0.3); overflow-x: auto;">{{ result.error }}</pre>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+{% else %}
+<div class="alert alert-info">
+  ℹ This will send a reload signal to Trino so it picks up all configuration changes you've saved.
+  The command is configurable via <span class="text-mono">TRINO_RELOAD_COMMAND</span> in .env.
+</div>
+{% endif %}
+
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Send Reload Signal</span>
+  </div>
+  <div class="card-body">
+    <p class="text-muted mb-3">
+      After saving any configuration changes (catalogs, resource groups, roles, or core config),
+      Trino needs to reload its files. Click below to trigger the reload.
+    </p>
+    <form method="post" action="/reload/">
+      <button type="submit" class="btn btn-success">↺ Reload Trino Now</button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Trino Config Manager{% endblock %}
+{% block breadcrumb %}/ dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="grid grid-3 mb-4">
+    <div class="stat-card">
+        <div class="stat-value">{{ catalogs_count }}</div>
+        <div class="stat-label">Каталогов подключено</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value" style="color: {% if trino_alive %}var(--success){% else %}var(--danger){% endif %}">
+            {% if trino_alive %}UP{% else %}DOWN{% endif %}
+        </div>
+        <div class="stat-label">Статус Trino</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value" style="font-size:18px; padding-top:6px;">
+            <a href="/api/docs" style="color: var(--accent); text-decoration:none; font-size:14px; font-family:var(--mono)">→ API Docs</a>
+        </div>
+        <div class="stat-label">REST API (FastAPI)</div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">Подключённые каталоги</span>
+        <a href="/catalogs/new" class="btn btn-primary btn-sm">+ Добавить каталог</a>
+    </div>
+    {% if catalogs %}
+    <table>
+        <thead>
+            <tr>
+                <th>Имя каталога</th>
+                <th>Файл</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cat in catalogs %}
+            <tr>
+                <td><span class="text-mono" style="color:var(--text)">{{ cat }}</span></td>
+                <td><span class="text-mono text-xs text-muted">catalog/{{ cat }}.properties</span></td>
+                <td style="text-align:right">
+                    <a href="/catalogs/{{ cat }}/edit" class="btn btn-secondary btn-sm">Редактировать</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        <p>Каталоги не найдены. <a href="/catalogs/new" style="color:var(--accent)">Добавить первый</a></p>
+    </div>
+    {% endif %}
+</div>
+
+<div class="card mt-4">
+    <div class="card-header"><span class="card-title">Быстрые действия</span></div>
+    <div class="card-body flex gap-3">
+        <a href="/roles/" class="btn btn-secondary">Роли и доступ</a>
+        <a href="/resource-groups/" class="btn btn-secondary">Resource Groups</a>
+        <a href="/config/" class="btn btn-secondary">Конфигурация Trino</a>
+    </div>
+</div>
+{% endblock %}

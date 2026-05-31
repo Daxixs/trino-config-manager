@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}{% if is_new %}Новый каталог{% else %}{{ name }}{% endif %} — Trino Config Manager{% endblock %}
+{% block breadcrumb %}/ catalogs / {% if is_new %}new{% else %}{{ name }}{% endif %}{% endblock %}
+{% block page_title %}{% if is_new %}Новый каталог{% else %}Редактировать: {{ name }}{% endif %}{% endblock %}
+
+{% block content %}
+{% if errors %}
+<div class="alert alert-danger">
+    <div>
+        <strong>Ошибки валидации ({{ errors|length }}):</strong>
+        <ul class="errors-list mt-4">
+            {% for e in errors %}<li>{{ e }}</li>{% endfor %}
+        </ul>
+    </div>
+</div>
+{% endif %}
+
+<form method="post" action="/catalogs/{{ name if not is_new else 'new' }}/save">
+    {% if is_new %}
+    <div class="card mb-4">
+        <div class="card-header"><span class="card-title">Имя каталога</span></div>
+        <div class="card-body">
+            <div class="form-group" style="margin-bottom:0">
+                <label>Имя файла (без .properties)</label>
+                <input type="text" name="catalog_name" placeholder="my_postgres" required
+                       pattern="[a-zA-Z][a-zA-Z0-9_-]*"
+                       title="Только латиница, цифры, _ или -">
+                <div style="font-size:11px; color:var(--text3); margin-top:5px">
+                    Файл будет создан: <span class="text-mono">catalog/&lt;имя&gt;.properties</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Содержимое файла</span>
+            <div class="flex gap-2">
+                <select id="template-select" class="btn btn-secondary btn-sm" style="cursor:pointer"
+                        onchange="applyTemplate(this.value)">
+                    <option value="">— Шаблон —</option>
+                    <option value="postgresql">PostgreSQL</option>
+                    <option value="mysql">MySQL</option>
+                    <option value="hive">Hive</option>
+                    <option value="iceberg">Iceberg</option>
+                    <option value="tpch">TPCH (тест)</option>
+                </select>
+            </div>
+        </div>
+        <div class="card-body">
+            <textarea class="code-editor {% if errors %}has-errors{% endif %}"
+                      name="content" id="editor" rows="20"
+                      spellcheck="false">{{ content }}</textarea>
+            {% if backups %}
+            <div class="backups-list">Бэкапы: {{ backups | join(', ') }}</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="flex gap-3 mt-4">
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <a href="/catalogs/" class="btn btn-secondary">Отмена</a>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const templates = {
+    postgresql: `connector.name=postgresql\nconnection-url=jdbc:postgresql://host:5432/dbname\nconnection-user=trino\nconnection-password=secret`,
+    mysql: `connector.name=mysql\nconnection-url=jdbc:mysql://host:3306/dbname\nconnection-user=trino\nconnection-password=secret`,
+    hive: `connector.name=hive\nhive.metastore.uri=thrift://localhost:9083\nhive.config.resources=/etc/hadoop/conf/core-site.xml`,
+    iceberg: `connector.name=iceberg\niceberg.catalog.type=hive_metastore\nhive.metastore.uri=thrift://localhost:9083`,
+    tpch: `connector.name=tpch`,
+};
+function applyTemplate(key) {
+    if (!key) return;
+    if (confirm('Заменить содержимое шаблоном?')) {
+        document.getElementById('editor').value = templates[key];
+    }
+    document.getElementById('template-select').value = '';
+}
+
+// Tab key in textarea
+document.getElementById('editor').addEventListener('keydown', function(e) {
+    if (e.key === 'Tab') {
+        e.preventDefault();
+        const s = this.selectionStart;
+        this.value = this.value.substring(0, s) + '  ' + this.value.substring(this.selectionEnd);
+        this.selectionStart = this.selectionEnd = s + 2;
+    }
+});
+</script>
+{% endblock %}

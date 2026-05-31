@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Trino Config — Trino Config Manager{% endblock %}
+{% block page_title %}Trino Configuration Files{% endblock %}
+
+{% block content %}
+
+<div class="alert alert-info">
+  ℹ Core Trino configuration files. Changes take effect after reloading Trino.
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Core Config Files</span>
+  </div>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>File</th>
+        <th>Description</th>
+        <th style="text-align:right">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="text-mono" style="color: var(--accent2)">config.properties</span></td>
+        <td><span class="text-muted">Coordinator/worker settings, ports, memory limits</span></td>
+        <td style="text-align:right">
+          <a href="/config/config.properties/edit" class="btn btn-secondary btn-sm">✎ Edit</a>
+        </td>
+      </tr>
+      <tr>
+        <td><span class="text-mono" style="color: var(--accent2)">jvm.config</span></td>
+        <td><span class="text-muted">JVM flags: heap size, GC options, etc.</span></td>
+        <td style="text-align:right">
+          <a href="/config/jvm.config/edit" class="btn btn-secondary btn-sm">✎ Edit</a>
+        </td>
+      </tr>
+      <tr>
+        <td><span class="text-mono" style="color: var(--accent2)">node.properties</span></td>
+        <td><span class="text-muted">Node identity: environment, ID, data directory</span></td>
+        <td style="text-align:right">
+          <a href="/config/node.properties/edit" class="btn btn-secondary btn-sm">✎ Edit</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+{% endblock %}

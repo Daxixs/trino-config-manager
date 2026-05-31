@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Конфигурация Trino — Trino Config Manager{% endblock %}
+{% block breadcrumb %}/ config{% endblock %}
+{% block page_title %}Конфигурация Trino{% endblock %}
+
+{% block content %}
+{% if config_errors or jvm_errors or node_errors %}
+<div class="alert alert-danger">
+    <div>
+        <strong>Ошибки валидации:</strong>
+        {% if config_errors %}
+        <div style="margin-top:8px"><em>config.properties:</em></div>
+        <ul class="errors-list">{% for e in config_errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+        {% if jvm_errors %}
+        <div style="margin-top:8px"><em>jvm.config:</em></div>
+        <ul class="errors-list">{% for e in jvm_errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+        {% if node_errors %}
+        <div style="margin-top:8px"><em>node.properties:</em></div>
+        <ul class="errors-list">{% for e in node_errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<form method="post" action="/config/save">
+    <div class="tabs">
+        <button type="button" class="tab-btn active" onclick="switchTab('config', this)">config.properties</button>
+        <button type="button" class="tab-btn" onclick="switchTab('jvm', this)">jvm.config</button>
+        <button type="button" class="tab-btn" onclick="switchTab('node', this)">node.properties</button>
+    </div>
+
+    <div id="tab-config" class="tab-pane active">
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">config.properties</span>
+                <span class="text-mono text-xs text-muted">/etc/trino/config.properties</span>
+            </div>
+            <div class="card-body">
+                <textarea class="code-editor {% if config_errors %}has-errors{% endif %}"
+                          name="config_content" rows="20" spellcheck="false">{{ config_content }}</textarea>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-jvm" class="tab-pane">
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">jvm.config</span>
+                <span class="text-mono text-xs text-muted">/etc/trino/jvm.config</span>
+            </div>
+            <div class="card-body">
+                <textarea class="code-editor {% if jvm_errors %}has-errors{% endif %}"
+                          name="jvm_content" rows="20" spellcheck="false">{{ jvm_content }}</textarea>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-node" class="tab-pane">
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">node.properties</span>
+                <span class="text-mono text-xs text-muted">/etc/trino/node.properties</span>
+            </div>
+            <div class="card-body">
+                <textarea class="code-editor {% if node_errors %}has-errors{% endif %}"
+                          name="node_content" rows="20" spellcheck="false">{{ node_content }}</textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex gap-3 mt-4">
+        <button type="submit" class="btn btn-primary">Сохранить все файлы</button>
+        <a href="/" class="btn btn-secondary">Отмена</a>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function switchTab(name, btn) {
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    btn.classList.add('active');
+}
+document.querySelectorAll('textarea').forEach(ta => {
+    ta.addEventListener('keydown', function(e) {
+        if (e.key === 'Tab') {
+            e.preventDefault();
+            const s = this.selectionStart;
+            this.value = this.value.substring(0, s) + '  ' + this.value.substring(this.selectionEnd);
+            this.selectionStart = this.selectionEnd = s + 2;
+        }
+    });
+});
+// Auto-open tab with errors
+{% if config_errors %}switchTab('config', document.querySelector('.tab-btn'));{% endif %}
+{% if jvm_errors %}switchTab('jvm', document.querySelectorAll('.tab-btn')[1]);{% endif %}
+{% if node_errors %}switchTab('node', document.querySelectorAll('.tab-btn')[2]);{% endif %}
+</script>
+{% endblock %}
