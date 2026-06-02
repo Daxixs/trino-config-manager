@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi import APIRouter
+from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 
 from app.services.trino_service import TrinoService

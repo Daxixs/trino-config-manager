@@ -35,7 +35,6 @@ def validate_trino_config(content: str) -> list[str]:
         if not _validate_data_size(props["query.max-memory-per-node"]):
             errors.append("query.max-memory-per-node: неверный формат (пример: '1GB')")
 
-    # Проверка формата строк
     for i, line in enumerate(content.splitlines(), 1):
         stripped = line.strip()
         if not stripped or stripped.startswith("#"):
@@ -53,18 +52,18 @@ def validate_jvm_config(content: str) -> list[str]:
     if not content.strip():
         return ["Файл не может быть пустым"]
 
-    lines = [l.strip() for l in content.splitlines() if l.strip() and not l.startswith("#")]
+    lines = [ln.strip() for ln in content.splitlines() if ln.strip() and not ln.strip().startswith("#")]
 
     for line in lines:
         if not line.startswith("-"):
             errors.append(f"Неверная JVM опция: '{line}'. Должна начинаться с '-'")
 
-    has_server = any(l == "-server" for l in lines)
+    has_server = any(ln == "-server" for ln in lines)
     if not has_server:
         errors.append("Отсутствует флаг -server (рекомендуется для production)")
 
-    xmx_flags = [l for l in lines if l.startswith("-Xmx")]
-    xms_flags = [l for l in lines if l.startswith("-Xms")]
+    xmx_flags = [ln for ln in lines if ln.startswith("-Xmx")]
+    xms_flags = [ln for ln in lines if ln.startswith("-Xms")]
 
     if len(xmx_flags) > 1:
         errors.append(f"Дублирующиеся флаги -Xmx: {xmx_flags}")

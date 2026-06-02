@@ -1,8 +1,5 @@
 from fastapi import Request, HTTPException, status
-from fastapi.responses import RedirectResponse
-import secrets
 
-from app.config import settings
 
 
 def check_auth(request: Request) -> bool:
