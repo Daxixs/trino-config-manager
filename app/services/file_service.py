@@ -17,15 +17,21 @@ class FileService:
             return await f.read()
 
     @staticmethod
-    async def write_file(path: Path, content: str) -> None:
+    async def write_file(path: Path, content: str):
         path.parent.mkdir(parents=True, exist_ok=True)
+
+        backup_path = None
+
         if path.exists():
             backup_path = path.with_suffix(
                 f".bak.{datetime.now().strftime('%Y%m%d_%H%M%S')}"
             )
             shutil.copy2(path, backup_path)
+
         async with aiofiles.open(path, mode="w", encoding="utf-8") as f:
             await f.write(content)
+
+        return backup_path
 
     @staticmethod
     def list_catalogs() -> list[str]:
@@ -44,6 +50,27 @@ class FileService:
             path.unlink()
 
     @staticmethod
-    def list_backups(path: Path) -> list[str]:
+    async def delete_catalog(name: str) -> bool:
+        path = settings.TRINO_CATALOG_DIR / f"{name}.properties"
+
+        if not path.exists():
+            return False
+
+        await FileService.delete_file(path)
+        return True
+
+    @staticmethod
+    def list_backups(path: Path) -> list[dict]:
         pattern = f"{path.stem}.bak.*"
-        return sorted([str(p.name) for p in path.parent.glob(pattern)])
+
+        backups = []
+
+        for p in sorted(path.parent.glob(pattern)):
+            backups.append(
+                {
+                    "name": p.name,
+                    "path": str(p),
+                }
+            )
+
+        return backups
