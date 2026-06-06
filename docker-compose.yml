@@ -21,7 +21,7 @@ services:
     restart: unless-stopped
 
   trino:
-    image: trinodb/trino:latest
+    image: trinodb/trino:435
     ports:
       - "8080:8080"
     volumes:
